@@ -1,9 +1,13 @@
 package com.example.tttest;
 
 import android.content.Context;
+import android.graphics.Color;
+import android.graphics.PorterDuff;
 import android.os.Bundle;
+import android.util.Log;
 import android.util.Size;
 import android.view.OrientationEventListener;
+import android.view.View;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -21,6 +25,7 @@ import androidx.lifecycle.LifecycleOwner;
 
 import com.google.common.util.concurrent.ListenableFuture;
 
+import java.io.Console;
 import java.util.Locale;
 import java.util.concurrent.ExecutionException;
 
@@ -28,10 +33,12 @@ public class CameraActivity extends AppCompatActivity {
     private PreviewView previewView;
     private ListenableFuture<ProcessCameraProvider> cameraProviderFuture;
     private Context thisContext = this;
+    private ImageController imageController;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        imageController = new ImageController(Color.rgb(34, 177, 76), 50);
         setContentView(R.layout.activity_camera);
         previewView = findViewById(R.id.previewView);
         cameraProviderFuture = ProcessCameraProvider.getInstance(this);
@@ -53,9 +60,20 @@ public class CameraActivity extends AppCompatActivity {
                 new ImageAnalysis.Builder().setTargetResolution(new Size(1280, 720))
                         .setBackpressureStrategy(ImageAnalysis.STRATEGY_KEEP_ONLY_LATEST).build();
         imageAnalysis.setAnalyzer(ContextCompat.getMainExecutor(this), new ImageAnalysis.Analyzer() {
+            int skip = 10;
+            int counter = 0;
             @Override
             public void analyze(@NonNull ImageProxy image) {
-                Toast.makeText(thisContext, String.format(Locale.ENGLISH,"Height: %d\nWidth: %d", image.getHeight(), image.getWidth()), Toast.LENGTH_SHORT).show();
+                // skip frames voor betere performance (hopelijk)
+                if (counter >= skip){
+                    int[] keys = imageController.getActiveKeys(image);
+                    Log.d("TTCAM", String.format("keys: %d", keys[0]));
+
+                    counter = 0;
+                }
+                else {
+                    counter++;
+                }
                 image.close();
             }
         });
