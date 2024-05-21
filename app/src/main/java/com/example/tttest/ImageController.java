@@ -40,13 +40,14 @@ public class ImageController {
     public int[] getActiveKeys(ImageProxy image) {
 
         // 14 is aantal keys hier
-        int[] keys = new int[14];
+        int[] keys = new int[24];
 
 
         Bitmap img = cropImage(image, image.getWidth() / 2 - 20, image.getHeight() / 2 - 20, 40, 40);
 
         if (isColoredInRegion(img)) {
             keys[0] = 1;
+            keys[12] = 1;
         } else keys[0] = 0;
 
         return keys;

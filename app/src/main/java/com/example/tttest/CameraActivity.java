@@ -26,6 +26,7 @@ import androidx.lifecycle.LifecycleOwner;
 import com.google.common.util.concurrent.ListenableFuture;
 
 import java.io.Console;
+import java.io.IOException;
 import java.util.Locale;
 import java.util.concurrent.ExecutionException;
 
@@ -34,11 +35,13 @@ public class CameraActivity extends AppCompatActivity {
     private ListenableFuture<ProcessCameraProvider> cameraProviderFuture;
     private Context thisContext = this;
     private ImageController imageController;
+    private SoundPlayer soundPlayer;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         imageController = new ImageController(Color.rgb(34, 177, 76), 50);
+        soundPlayer = new SoundPlayer(thisContext);
         setContentView(R.layout.activity_camera);
         previewView = findViewById(R.id.previewView);
         cameraProviderFuture = ProcessCameraProvider.getInstance(this);
@@ -68,7 +71,7 @@ public class CameraActivity extends AppCompatActivity {
                 if (counter >= skip){
                     int[] keys = imageController.getActiveKeys(image);
                     Log.d("TTCAM", String.format("keys: %d", keys[0]));
-
+                    soundPlayer.playSound(keys);
                     counter = 0;
                 }
                 else {
