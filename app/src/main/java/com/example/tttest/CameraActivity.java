@@ -12,6 +12,8 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.camera.core.Camera;
+import androidx.camera.core.CameraControl;
 import androidx.camera.core.CameraSelector;
 import androidx.camera.core.ImageAnalysis;
 import androidx.camera.core.ImageProxy;
@@ -30,6 +32,7 @@ public class CameraActivity extends AppCompatActivity {
     private ListenableFuture<ProcessCameraProvider> cameraProviderFuture;
     private ImageController imageController;
     private SoundPlayer soundPlayer;
+    private Camera camera;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -45,10 +48,8 @@ public class CameraActivity extends AppCompatActivity {
             try {
                 ProcessCameraProvider cameraProvider = cameraProviderFuture.get();
                 bindImageAnalysis(cameraProvider);
-                turnOnLight(true);
             } catch (ExecutionException | InterruptedException e) {
                 e.printStackTrace();
-                turnOnLight(false);
             }
         }, ContextCompat.getMainExecutor(this));
     }
@@ -58,7 +59,7 @@ public class CameraActivity extends AppCompatActivity {
                 new ImageAnalysis.Builder().setTargetResolution(new Size(1280, 720))
                         .setBackpressureStrategy(ImageAnalysis.STRATEGY_KEEP_ONLY_LATEST).build();
         imageAnalysis.setAnalyzer(ContextCompat.getMainExecutor(this), new ImageAnalysis.Analyzer() {
-            int skip = 10;
+            int skip = 5;
             int counter = 0;
 
             @Override
@@ -84,22 +85,8 @@ public class CameraActivity extends AppCompatActivity {
         CameraSelector cameraSelector = new CameraSelector.Builder()
                 .requireLensFacing(CameraSelector.LENS_FACING_BACK).build();
         preview.setSurfaceProvider(previewView.getSurfaceProvider());
-        cameraProvider.bindToLifecycle((LifecycleOwner) this, cameraSelector, imageAnalysis, preview);
-    }
-
-    private void turnOnLight(boolean enabled){
-        if (this.getPackageManager().hasSystemFeature(PackageManager.FEATURE_CAMERA_FLASH)){
-            CameraManager cameraManager = (CameraManager) getSystemService(CAMERA_SERVICE);
-            String camId = null;
-            try {
-                camId = cameraManager.getCameraIdList()[0];
-                cameraManager.setTorchMode(camId, enabled);
-            } catch (CameraAccessException| IllegalArgumentException e){
-                e.printStackTrace();
-            }
-        }
-        else {
-            Toast.makeText(this, "No flash available", Toast.LENGTH_SHORT).show();
-        }
+        camera = cameraProvider.bindToLifecycle((LifecycleOwner) this, cameraSelector, imageAnalysis, preview);
+        CameraControl cameraControl = camera.getCameraControl();
+        cameraControl.enableTorch(true);
     }
 }
