@@ -1,9 +1,13 @@
 package com.example.tttest;
 
+import android.content.pm.PackageManager;
 import android.graphics.Color;
+import android.hardware.camera2.CameraAccessException;
+import android.hardware.camera2.CameraManager;
 import android.os.Bundle;
 import android.util.Log;
 import android.util.Size;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -33,7 +37,7 @@ public class CameraActivity extends AppCompatActivity {
         setContentView(R.layout.activity_camera);
         previewView = findViewById(R.id.previewView);
 
-        imageController = new ImageController(Color.rgb(34, 177, 76), 50);
+        imageController = new ImageController(Color.rgb(118, 199, 228), 20);
         soundPlayer = new SoundPlayer(this);
 
         cameraProviderFuture = ProcessCameraProvider.getInstance(this);
@@ -41,8 +45,10 @@ public class CameraActivity extends AppCompatActivity {
             try {
                 ProcessCameraProvider cameraProvider = cameraProviderFuture.get();
                 bindImageAnalysis(cameraProvider);
+                turnOnLight(true);
             } catch (ExecutionException | InterruptedException e) {
                 e.printStackTrace();
+                turnOnLight(false);
             }
         }, ContextCompat.getMainExecutor(this));
     }
@@ -59,6 +65,7 @@ public class CameraActivity extends AppCompatActivity {
             public void analyze(@NonNull ImageProxy image) {
                 if (counter >= skip) {
                     int[] keys = imageController.getActiveKeys(image);
+                    Log.d("TTCAM", String.format("%d", keys[0]));
                     for (int i = 0; i < keys.length; i++) {
                         if (keys[i] == 1) {
                             Log.d("TTCAM", String.format("Green dot detected in rectangle: %d", i));
@@ -78,5 +85,21 @@ public class CameraActivity extends AppCompatActivity {
                 .requireLensFacing(CameraSelector.LENS_FACING_BACK).build();
         preview.setSurfaceProvider(previewView.getSurfaceProvider());
         cameraProvider.bindToLifecycle((LifecycleOwner) this, cameraSelector, imageAnalysis, preview);
+    }
+
+    private void turnOnLight(boolean enabled){
+        if (this.getPackageManager().hasSystemFeature(PackageManager.FEATURE_CAMERA_FLASH)){
+            CameraManager cameraManager = (CameraManager) getSystemService(CAMERA_SERVICE);
+            String camId = null;
+            try {
+                camId = cameraManager.getCameraIdList()[0];
+                cameraManager.setTorchMode(camId, enabled);
+            } catch (CameraAccessException| IllegalArgumentException e){
+                e.printStackTrace();
+            }
+        }
+        else {
+            Toast.makeText(this, "No flash available", Toast.LENGTH_SHORT).show();
+        }
     }
 }
