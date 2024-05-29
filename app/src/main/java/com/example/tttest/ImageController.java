@@ -41,18 +41,42 @@ public class ImageController {
 
         int width = bitmap.getWidth();
         int height = bitmap.getHeight();
-        int rectWidth = width / 24;
 
-        for (int i = 0; i < 24; i++) {
-            int xOffset = i * rectWidth;
-            Bitmap cropped = Bitmap.createBitmap(bitmap, xOffset, 0, rectWidth, height);
+        // Define the number of keys and their widths
+        int numKeys = 24;
+        float[] keyWidths = calculateKeyWidths(width);
 
+        // Iterate through each key region
+        for (int i = 0; i < numKeys; i++) {
+            int xOffset = Math.round((i == 0) ? 0 : keyWidths[i - 1]); // Offset for starting position
+            int keyWidth = Math.round(keyWidths[i]); // Width of the key region
+
+            // Extract the region corresponding to the key
+            Bitmap cropped = Bitmap.createBitmap(bitmap, xOffset, 0, keyWidth, height);
+
+            // Check if the key region contains the active color
             if (isColoredInRegion(cropped)) {
                 keys[i] = 1;
             }
         }
 
         return keys;
+    }
+
+    private float[] calculateKeyWidths(int totalWidth) {
+        // Initialize the key widths array
+        float[] keyWidths = new float[24];
+
+        // Calculate the width of the middle key
+        float middleKeyWidth = totalWidth * 0.9f / 24; // 90% of the width for keys
+
+        // Adjust the widths for outer keys
+        for (int i = 0; i < 24; i++) {
+            float factor = (i < 12) ? 0.98f - ((0.98f - 1f) * i / 11) : 0.98f - ((0.98f - 1f) * (23 - i) / 11);
+            keyWidths[i] = middleKeyWidth * factor;
+        }
+
+        return keyWidths;
     }
 
     private Bitmap toBitmap(Image image) {

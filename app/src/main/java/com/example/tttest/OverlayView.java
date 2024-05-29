@@ -64,7 +64,7 @@ public class OverlayView extends View {
 
             // Add extra spacing for specified keys
             if (i == 1 || i == 7 || i == 8 || i == 12 || i == 13 || i == 19 || i == 20) {
-                currentLeft += 20;
+                currentLeft += 25;
             }
 
             // Make inner keys slightly smaller
