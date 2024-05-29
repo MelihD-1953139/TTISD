@@ -76,8 +76,8 @@ public class ImageController {
             int yOffset = height * 72 / 100; // Place the rectangles at 3/4 of the height
 
             // die crashed hier anders op sommige apparaten, komt nie altijd uit. Joren
-            if (xOffset + (int)rectWidth > 180){
-                xOffset = 180 - (int)rectWidth;
+            if (xOffset + (int)rectWidth > bitmap.getWidth()){
+                xOffset = bitmap.getWidth() - (int)rectWidth;
             }
 
             Bitmap cropped = Bitmap.createBitmap(bitmap, xOffset, yOffset, (int) rectWidth, height - yOffset);
