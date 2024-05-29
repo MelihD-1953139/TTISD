@@ -41,42 +41,50 @@ public class ImageController {
 
         int width = bitmap.getWidth();
         int height = bitmap.getHeight();
-
-        // Define the number of keys and their widths
         int numKeys = 24;
-        float[] keyWidths = calculateKeyWidths(width);
+        int middleKeyIndex = numKeys / 2;
+        float totalWidthWithoutMargins = (float) (width * 0.9); // 90% of the width for keys
+        float middleKeyWidth = totalWidthWithoutMargins / (numKeys + (OverlayView.OUTER_KEY_WIDTH_FACTOR - 1) * 2);
+        float totalWidth = middleKeyWidth * numKeys;
 
-        // Iterate through each key region
+        // Adjust the currentLeft to match the position of the keys
+        int currentLeft = (width - (int) totalWidth) / 2; // Center the rectangles horizontally
         for (int i = 0; i < numKeys; i++) {
-            int xOffset = Math.round((i == 0) ? 0 : keyWidths[i - 1]); // Offset for starting position
-            int keyWidth = Math.round(keyWidths[i]); // Width of the key region
+            float rectWidth;
+            if (i < middleKeyIndex) {
+                // Outer keys on the left
+                rectWidth = middleKeyWidth * (OverlayView.OUTER_KEY_WIDTH_FACTOR - ((OverlayView.OUTER_KEY_WIDTH_FACTOR - 1) * i / middleKeyIndex));
+            } else {
+                // Outer keys on the right
+                rectWidth = middleKeyWidth * (OverlayView.OUTER_KEY_WIDTH_FACTOR - ((OverlayView.OUTER_KEY_WIDTH_FACTOR - 1) * (numKeys - i - 1) / middleKeyIndex));
+            }
 
-            // Extract the region corresponding to the key
-            Bitmap cropped = Bitmap.createBitmap(bitmap, xOffset, 0, keyWidth, height);
+            // Add extra spacing for specified keys
+            if (i == 1 || i == 7 || i == 8 || i == 12 || i == 13 || i == 19 || i == 20) {
+                currentLeft += 31;
+                if (i == 12) {
+                    currentLeft += 5;
+                }
+            }
 
-            // Check if the key region contains the active color
+            // Make inner keys slightly smaller
+            if (i > 2 && i < 20) {
+                rectWidth *= OverlayView.INNER_KEY_WIDTH_FACTOR;
+            }
+
+            int xOffset = currentLeft;
+            int yOffset = height * 72 / 100; // Place the rectangles at 3/4 of the height
+
+            Bitmap cropped = Bitmap.createBitmap(bitmap, xOffset, yOffset, (int) rectWidth, height - yOffset);
+
             if (isColoredInRegion(cropped)) {
                 keys[i] = 1;
             }
+
+            currentLeft += rectWidth;
         }
 
         return keys;
-    }
-
-    private float[] calculateKeyWidths(int totalWidth) {
-        // Initialize the key widths array
-        float[] keyWidths = new float[24];
-
-        // Calculate the width of the middle key
-        float middleKeyWidth = totalWidth * 0.9f / 24; // 90% of the width for keys
-
-        // Adjust the widths for outer keys
-        for (int i = 0; i < 24; i++) {
-            float factor = (i < 12) ? 0.98f - ((0.98f - 1f) * i / 11) : 0.98f - ((0.98f - 1f) * (23 - i) / 11);
-            keyWidths[i] = middleKeyWidth * factor;
-        }
-
-        return keyWidths;
     }
 
     private Bitmap toBitmap(Image image) {

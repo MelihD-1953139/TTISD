@@ -9,8 +9,8 @@ import android.view.View;
 
 public class OverlayView extends View {
     private Paint paint;
-    private static final float INNER_KEY_WIDTH_FACTOR = 0.90f; // Adjusted factor to make inner keys slightly smaller
-    private static final float OUTER_KEY_WIDTH_FACTOR = 0.98f; // Adjusted factor to make outer keys slightly wider
+    public static final float INNER_KEY_WIDTH_FACTOR = 0.915f; // Adjusted factor to make inner keys slightly smaller
+    public static final float OUTER_KEY_WIDTH_FACTOR = 0.95f; // Adjusted factor to make outer keys slightly wider
     private static final int EXTRA_SPACING = 5; // Extra spacing in pixels
 
     public OverlayView(Context context, AttributeSet attrs) {
@@ -33,10 +33,10 @@ public class OverlayView extends View {
         int height = getHeight();
 
         // Set the height of each rectangle to be 25% of the total height
-        int rectHeight = height / 4;
+        int rectHeight = height / 7;
 
-        // Center the rectangles vertically
-        int topOffset = (height - rectHeight) / 2;
+        // Place the rectangles at 3/4 of the height
+        int topOffset = (height *  72/100) - (rectHeight / 2);
 
         // Calculate the width of the middle key
         int numKeys = 24;
@@ -64,7 +64,10 @@ public class OverlayView extends View {
 
             // Add extra spacing for specified keys
             if (i == 1 || i == 7 || i == 8 || i == 12 || i == 13 || i == 19 || i == 20) {
-                currentLeft += 25;
+                currentLeft += 31;
+                if(i == 12){
+                    currentLeft += 5;
+                }
             }
 
             // Make inner keys slightly smaller
@@ -81,4 +84,5 @@ public class OverlayView extends View {
             currentLeft += rectWidth;
         }
     }
+
 }
