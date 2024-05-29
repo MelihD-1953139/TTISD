@@ -29,7 +29,7 @@ public class SoundPlayer {
                 .build();
 
         soundPool = new SoundPool.Builder()
-                .setMaxStreams(10)
+                .setMaxStreams(24)
                 .setAudioAttributes(audioAttributes)
                 .build();
 
@@ -38,10 +38,11 @@ public class SoundPlayer {
         for (int i = 0; i < SOUND_RES_IDS.length; i++) {
             soundIds[i] = soundPool.load(context, SOUND_RES_IDS[i], 1);
         }
-        Log.d("SoundIds", Integer.toString(soundIds[5]));
     }
 
     public void playSound(int[] keys) {
+        // keys vergeten te reversen :)
+        keys = reverse(keys, keys.length);
         for (int i = 0; i < keys.length; i++) {
             if (keys[i] == 1) {
                 if (activeSounds[i] == 0)
@@ -53,6 +54,17 @@ public class SoundPlayer {
                 stopSound(i);
             }
         }
+    }
+
+    private int[] reverse(int a[], int n)
+    {
+        int[] b = new int[n];
+        int j = n;
+        for (int i = 0; i < n; i++) {
+            b[j - 1] = a[i];
+            j = j - 1;
+        }
+        return b;
     }
 
     private void stopSound(int soundIndex) {

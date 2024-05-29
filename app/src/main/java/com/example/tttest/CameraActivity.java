@@ -42,7 +42,7 @@ public class CameraActivity extends AppCompatActivity {
         setContentView(R.layout.activity_camera);
         previewView = findViewById(R.id.previewView);
 
-        imageController = new ImageController(Color.rgb(140, 200, 230), 30);
+        imageController = new ImageController(Color.rgb(140, 220, 240), 30);
         soundPlayer = new SoundPlayer(this);
 
         cameraProviderFuture = ProcessCameraProvider.getInstance(this);
@@ -61,7 +61,7 @@ public class CameraActivity extends AppCompatActivity {
                 new ImageAnalysis.Builder().setTargetResolution(new Size(1920, 1080))
                         .setBackpressureStrategy(ImageAnalysis.STRATEGY_KEEP_ONLY_LATEST).build();
         imageAnalysis.setAnalyzer(ContextCompat.getMainExecutor(this), new ImageAnalysis.Analyzer() {
-            int skip = 1;
+            int skip = 0;
             int counter = 0;
 
             @Override

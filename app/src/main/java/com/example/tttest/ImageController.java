@@ -102,6 +102,9 @@ public class ImageController {
 
         boolean[] isWide = {true, false, false, false, false, false, true, true, false, false, false, true, true, false, false, false, false, false, true, true, false, false, false, true};
         for (int i = 0; i < 24; i++){
+            if (currentWidth + boxWidth > bitmap.getWidth()){
+                currentWidth = bitmap.getWidth() - boxWidth;
+            }
             Bitmap cropped = Bitmap.createBitmap(bitmap, currentWidth, drawHeight, boxWidth, boxHeight);
             if (isColoredInRegion(cropped)) {
                 keys[i] = 1;
@@ -148,9 +151,9 @@ public class ImageController {
             Log.e("ImageController", "Bitmap is null");
             return false;
         }
-        int triggerRange = 20;
+        int triggerRange = 4;
 
-        // return true als 3 onder elkaar ok zijn
+        // return true als triggerrange aantal onder elkaar ok zijn
         for (int y = 0; y < image.getHeight(); y++) {
             for (int x = 0; x < image.getWidth(); x++) {
                 int pixel = image.getPixel(x, y);
@@ -174,10 +177,7 @@ public class ImageController {
                                 stillColored = isInRange(pixelUnder);
                             }
                         }
-
-
                     }
-                    return true;
                 }
             }
         }
