@@ -2,11 +2,13 @@ package com.example.tttest;
 
 import android.content.pm.PackageManager;
 import android.graphics.Color;
+import android.graphics.Rect;
 import android.hardware.camera2.CameraAccessException;
 import android.hardware.camera2.CameraManager;
 import android.os.Bundle;
 import android.util.Log;
 import android.util.Size;
+import android.view.Window;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -40,7 +42,7 @@ public class CameraActivity extends AppCompatActivity {
         setContentView(R.layout.activity_camera);
         previewView = findViewById(R.id.previewView);
 
-        imageController = new ImageController(Color.rgb(118, 199, 228), 20);
+        imageController = new ImageController(Color.rgb(140, 200, 230), 30);
         soundPlayer = new SoundPlayer(this);
 
         cameraProviderFuture = ProcessCameraProvider.getInstance(this);
@@ -56,22 +58,16 @@ public class CameraActivity extends AppCompatActivity {
 
     private void bindImageAnalysis(@NonNull ProcessCameraProvider cameraProvider) {
         ImageAnalysis imageAnalysis =
-                new ImageAnalysis.Builder().setTargetResolution(new Size(1280, 720))
+                new ImageAnalysis.Builder().setTargetResolution(new Size(1920, 1080))
                         .setBackpressureStrategy(ImageAnalysis.STRATEGY_KEEP_ONLY_LATEST).build();
         imageAnalysis.setAnalyzer(ContextCompat.getMainExecutor(this), new ImageAnalysis.Analyzer() {
-            int skip = 5;
+            int skip = 1;
             int counter = 0;
 
             @Override
             public void analyze(@NonNull ImageProxy image) {
                 if (counter >= skip) {
-                    int[] keys = imageController.getActiveKeys(image);
-                    Log.d("TTCAM", String.format("%d", keys[0]));
-                    for (int i = 0; i < keys.length; i++) {
-                        if (keys[i] == 1) {
-                            Log.d("TTCAM", String.format("Green dot detected in rectangle: %d", i));
-                        }
-                    }
+                    int[] keys = imageController.getActiveKeys(image, 110);
                     soundPlayer.playSound(keys);
                     counter = 0;
                 } else {
